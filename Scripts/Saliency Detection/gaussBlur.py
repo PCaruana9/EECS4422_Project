@@ -74,10 +74,9 @@ blanc[200:700, 700:1200] = Imask
 alpha = blanc/255
 
 b1 = alphaBlend(img, blur, 255 - blanc)
-cv2.imshow("Blended", b1)
-cv2.waitKey(0)
 
-cv2.imwrite("PeripheralExample.jpg", b1)
+
+#cv2.imwrite("PeripheralExample.jpg", b1)
 
 
 
