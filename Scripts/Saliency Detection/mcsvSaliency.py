@@ -46,6 +46,20 @@ screen = pygame.display.set_mode(scale)
 frame = bg
 frame = frame.swapaxes(0,1)
 frame = pygame.surfarray.make_surface(frame)
+
+#Pre-cash blur images
+blurCash = [[0 for x in range(1000)] for y in range(1000)]
+List = [0,0]
+print("Cashing Blured Images")
+count = 0
+for i in range(0,1000):
+	for j in range(0,1000):
+		List[0] = i
+		List[1] = j
+		blurCash[i][j] = compute_blur(List, bg, blurBg, mask)
+		count = count + 1
+		print("Cashed " + str(count) + "/10000")
+print("Finished Cash")
 while running:
 	event = pygame.event.poll()
 
@@ -58,7 +72,7 @@ while running:
 			print("mouse at (%d, %d)" %(event.pos))
 
 			 
-			blurImg = compute_blur(event.pos, bg, blurBg, mask)
+			blurImg = blurCash[event.pos[0]][event.pos[1]]
 			frame = blurImg 
 			frame = frame.swapaxes(0,1)
 			frame = pygame.surfarray.make_surface(frame) 
