@@ -15,28 +15,34 @@ def alphaBlend(img1, img2, mask):
     return blended
 
 def compute_blur(mouseLocation, img, blur, mask):
-	Smask = np.zeros((1080,1920,3))
-	W = mouseLocation[0] - 100
-	H = mouseLocation[1] - 100
-	Smask[(H):(H+500), (W):(W+500)] = mask #Centers mask at cursor
+	Smask = np.zeros((866,1300,3))
+	W = mouseLocation[0]
+	H = mouseLocation[1]
+	for X in range(W-250+1,W+250-1):
+		for Y in range(H-250+1, H+250-1):
+			if(not(X < 0) and not(X > 1300) and not(Y < 0) and not(Y > 1300)):
+				Smask[Y,X] = mask[Y-H+250, X-W+250] #Centers mask at cursor
+			
 	new = alphaBlend(img, blur, 255 - Smask)
 	return new
 	
 	
-
 pygame.init() #Activates pygame
+
+
+bg = cv2.imread("almonds.jpg",1)
+blurBg = cv2.GaussianBlur(bg, (101,101), 10)
+mask = cv2.imread("PeripheralMask.jpg")
+
+
+scale = (bg.shape[1],bg.shape[0])
 
 x = y = 0
 running = 1
 timeElapsed = 0
 clock = pygame.time.Clock()
-screen = pygame.display.set_mode((1080,720))
-bg = cv2.imread("Firefox_wallpaper.png")
-blurBg = cv2.GaussianBlur(bg, (101,101), 10)
-mask = cv2.imread("PeripheralMask.jpg")
+screen = pygame.display.set_mode(scale)
 
-
-scale = (1080,720)
 frame = bg
 frame = frame.swapaxes(0,1)
 frame = pygame.surfarray.make_surface(frame)
@@ -45,7 +51,7 @@ while running:
 
 	dt = clock.tick()
 	timeElapsed += dt
-	if(timeElapsed > 50): #only updates every 250ms
+	if(timeElapsed > 2): #only updates every 5ms
 		if event.type == pygame.QUIT:
 			running = 0
 		elif event.type == pygame.MOUSEMOTION:
@@ -57,7 +63,7 @@ while running:
 			frame = frame.swapaxes(0,1)
 			frame = pygame.surfarray.make_surface(frame) 
 			if event.pos == (300,200):
-				screen = pygame.display.set_mode((1080, 720))
+				screen = pygame.display.set_mode(scale)
 		timeElapsed = 0
  		
 
