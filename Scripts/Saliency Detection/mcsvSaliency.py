@@ -13,12 +13,14 @@ class saliency_analog:
         if mask.ndim == 3 and mask.shape[-1] == 3:
             alpha = mask / 255.0
         else:
-            alpha = cv2.cvtColor(mask, cv2.COLOR_GRAY2BGR) / 255.0
+            alpha = mask/255.0 #cv2.cvtColor(mask, cv2.COLOR_GRAY2BGR) / 255.0
+
         blended = cv2.convertScaleAbs(img1 * (1 - alpha) + img2 * alpha)
+        blended = cv2.cvtColor(blended, cv2.COLOR_GRAY2RGB)
         return blended
 
     def compute_blur(self, mouseLocation):
-        Smask = np.zeros((self.scale[1], self.scale[0], 3))
+        Smask = cv2.cvtColor(np.zeros((self.scale[1], self.scale[0], 3), np.uint8), cv2.COLOR_RGB2GRAY)
         W = mouseLocation[0]
         H = mouseLocation[1]
         for X in range(W - 250 + 1, W + 250 - 1):
@@ -88,9 +90,8 @@ class saliency_analog:
         self.totalTime = 0
 
 
-mask = cv2.imread("PeripheralMask.jpg")
-bg = cv2.imread("almonds.jpg", 1)
-bg = cv2.cvtColor(bg, cv2.COLOR_BGR2RGB)
+mask = cv2.imread("PeripheralMask.jpg", 0)
+bg = cv2.imread("almonds.jpg", 0)
 bg = cv2.resize(bg, (int(bg.shape[1] * 0.6), int(bg.shape[0] * 0.6)))
 game = saliency_analog(bg, mask)
 game.start()
