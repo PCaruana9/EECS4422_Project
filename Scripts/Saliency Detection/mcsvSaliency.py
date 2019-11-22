@@ -3,6 +3,8 @@ import pygame
 import numpy as np
 from pygame.locals import *
 import time
+import random
+import keyboard
 
 
 class saliency_analog:
@@ -42,26 +44,41 @@ class saliency_analog:
         blurBg = self.blurBg
         self.scale = scale
         x = y = 0
-        running = 1
-        timeElapsed = 0
-        clock = pygame.time.Clock()
+        running = 0
         screen = pygame.display.set_mode(scale)
 
-        frame = blurBg
+        frame = cv2.cvtColor(blurBg, cv2.COLOR_GRAY2RGB)  # opencv throws a goddamn fit when you give it grayscale.
         frame = frame.swapaxes(0, 1)
         frame = pygame.surfarray.make_surface(frame)
         count = 1
+
+        while True:
+            running = 0
+            event = pygame.event.poll()
+            if event.type == pygame.KEYDOWN:
+                break
+        running = 1
+
+        timeElapsed = 0
+        clock = pygame.time.Clock()
+
         while running:
             event = pygame.event.poll()
 
             dt = clock.tick()
             timeElapsed += dt
-            if timeElapsed > 0:  # only updates every <whenever> ?ms
+
+            if True:  # only runs when a key has been pressed
                 if event.type == pygame.QUIT:
                     running = 0
-                elif event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_RIGHT:
-                        running = 0
+                    pygame.display.quit()
+                    print("Session ended >> Closed window")
+                    break
+                if timeElapsed >= (7) * 1000:  # 10 seconds
+                    running = 0
+                    pygame.display.quit()
+                    print("Session ended >> Timeout")
+                    break
                 elif event.type == pygame.MOUSEMOTION:
                     print("mouse at (%d, %d)" % (event.pos))
 
@@ -78,35 +95,51 @@ class saliency_analog:
                     self.computeTime = time.time() - self.computeTime
                     self.totalTime += self.computeTime
                     self.avgComputeTime = (self.computeTime + self.totalTime) / count
-                    print(">> Avg Compute time: " + str(self.avgComputeTime))
+                    # print(">> Avg Compute time: " + str(self.avgComputeTime))
                     count = count + 1
                     frame = blurImg
                     frame = frame.swapaxes(0, 1)
                     frame = pygame.surfarray.make_surface(frame)
                     if event.pos == (300, 200):
                         screen = pygame.display.set_mode(scale)
-                timeElapsed = 0
 
             screen.blit(frame, (0, 0))
 
             # screen.fill((0, 0, 0))
             pygame.display.flip()
 
-
     def __init__(self, img, mask):
         pygame.init()  # Activates pygame
         self.bg = img
         self.mask = mask
-        self.blurBg = cv2.GaussianBlur(img, (101, 101), 10)
+        self.blurBg = cv2.GaussianBlur(img, (31, 31), 10)
         self.avgComputeTime = 0
         self.computeTime = 0
         self.totalTime = 0
         self.mouseMap = np.zeros((img.shape[0], img.shape[1], 1), np.uint8)
 
 
-mask = cv2.imread("PeripheralMask_small.jpg", 0)
-bg = cv2.imread("Venice_Watercolour.jpg", 0)
-bg = cv2.resize(bg, (int(bg.shape[1] * 0.5), int(bg.shape[0] * 0.5)))
-game = saliency_analog(bg, mask)
-game.start()
-cv2.imwrite("MouseMapping_1.jpg", game.mouseMap)
+if __name__ == "__main__":
+    ptcp = input("Input Participant ID (###): ")
+
+    f = open("TestSet/nameList", "r")
+    fileString = f.read()
+    nameList = fileString.splitlines()
+    f.close()
+
+    random.shuffle(nameList)  # Randomizes file list
+    mask = cv2.imread("PeripheralMask_small.jpg", 0)
+    for imgName in nameList:
+        imgName.replace(" ", '')
+        filename = "TestSet/" + imgName + ".jpg"
+        print(filename)
+        bg = cv2.imread(filename, 0)
+        # bg = cv2.resize(bg, (int(bg.shape[1]), int(bg.shape[0])))
+        game = saliency_analog(bg, mask)
+        print("Running mcsv on: " + imgName + " - Participant ID = " + str(ptcp))
+        game.start()
+        saveName = "TestResults/" + imgName + "_mmap_ptcp_" + str(ptcp) + ".jpg"
+        cv2.imwrite(saveName, game.mouseMap)
+        print("Saved result: " + saveName)
+
+    print("All done! Thanks for helping out :)")
