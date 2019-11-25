@@ -4,7 +4,7 @@ To run, double click mcsvSaliency.exe. A console window will appear and it will 
 
 Once you press enter, a black window will appear. This experiment involves using your mouse to look at a series of blurred images. Your mouse will allow you to see a the image clearly.
 
-There is no trick, or anything hidden - I just need you to look around at the images. Please try to just look around the picture naturally. You will have 7 seconds per image.
+There is no trick, or anything hidden - I just need you to look around at the images. Please try to just look around  You will have 7 seconds per image.
 
 When you are ready, press any button to begin. This will show the image. When 7 seconds is up, the next image will load -> Press any button again to continue.
 Do this over etc. until you have finished. 
